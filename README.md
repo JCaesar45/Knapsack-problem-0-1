@@ -37,8 +37,7 @@ python knapsack.py
 javac Knapsack.java
 java Knapsack
 ```
-```
-
+### References
 Bellman, R. (1957). *Dynamic programming*. Princeton University Press.
 
 Dantzig, G. B. (1957). Discrete-variable extremum problems. *Operations Research*, 5(2), 266-288. https://doi.org/10.1287/opre.5.2.266
