@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>0-1 Knapsack Solver</title>
+    <style>
+      :root {
+        --bg-primary: #0a0a0a;
+        --bg-secondary: #141414;
+        --accent: #d4af37;
+        --text-primary: #f5f5f5;
+        --text-secondary: #a0a0a0;
+        --border: #2a2a2a;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+      }
+      .container {
+        width: 100%;
+        max-width: 1200px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 3rem;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      }
+      h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, var(--accent), #fff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .subtitle {
+        color: var(--text-secondary);
+        margin-bottom: 2rem;
+        font-size: 1.1rem;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+      }
+      .panel {
+        background: var(--bg-primary);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1.5rem;
+      }
+      label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      textarea,
+      input {
+        width: 100%;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 0.75rem;
+        color: var(--text-primary);
+        font-family: "Fira Code", monospace;
+        font-size: 0.9rem;
+        resize: vertical;
+      }
+      textarea {
+        min-height: 200px;
+      }
+      input {
+        margin-bottom: 1rem;
+      }
+      button {
+        width: 100%;
+        padding: 1rem;
+        background: var(--accent);
+        color: var(--bg-primary);
+        border: none;
+        border-radius: 6px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+        margin-top: 1rem;
+      }
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(212, 175, 55, 0.2);
+      }
+      .result {
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: var(--bg-primary);
+        border: 1px solid var(--accent);
+        border-radius: 8px;
+        text-align: center;
+      }
+      .result-value {
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--accent);
+      }
+      @media (max-width: 768px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>0-1 Knapsack Algorithm</h1>
+      <p class="subtitle">Dynamic Programming Optimization Engine</p>
+      <div class="grid">
+        <div class="panel">
+          <label for="items">Items (JSON Array)</label>
+          <textarea id="items">
+[{"name":"map","weight":9,"value":150},{"name":"compass","weight":13,"value":35},{"name":"water","weight":153,"value":200},{"name":"sandwich","weight":50,"value":160},{"name":"glucose","weight":15,"value":60}]</textarea>
+          <label for="maxweight">Maximum Weight Capacity</label>
+          <input type="number" id="maxweight" value="100" />
+          <button id="solve">Execute Algorithm</button>
+        </div>
+        <div class="panel">
+          <label>Execution Output</label>
+          <div
+            id="output"
+            style="
+              font-family: &quot;Fira Code&quot;, monospace;
+              font-size: 0.9rem;
+              color: var(--text-secondary);
+              white-space: pre-wrap;
+              min-height: 200px;
+            "
+          >
+            Awaiting execution parameters...
+          </div>
+        </div>
+      </div>
+      <div class="result" id="result" style="display: none">
+        <label>Maximum Achievable Value</label>
+        <div class="result-value" id="result-value">0</div>
+      </div>
+    </div>
+
+    <script>
+      document.getElementById("solve").addEventListener("click", () => {
+        const outputEl = document.getElementById("output");
+        const resultEl = document.getElementById("result");
+        const resultValueEl = document.getElementById("result-value");
+
+        try {
+          const items = JSON.parse(document.getElementById("items").value);
+          const maxWeight = parseInt(
+            document.getElementById("maxweight").value,
+            10
+          );
+
+          if (!Array.isArray(items) || isNaN(maxWeight)) {
+            throw new Error(
+              "Invalid input parameters. Items must be an array and max weight must be an integer."
+            );
+          }
+
+          const startTime = performance.now();
+          const dp = new Array(maxWeight + 1).fill(0);
+
+          for (let i = 0; i < items.length; i++) {
+            const weight = items[i].weight;
+            const value = items[i].value;
+
+            if (typeof weight !== "number" || typeof value !== "number") {
+              throw new Error(
+                `Item at index ${i} has invalid weight or value types.`
+              );
+            }
+
+            for (let w = maxWeight; w >= weight; w--) {
+              dp[w] = Math.max(dp[w], dp[w - weight] + value);
+            }
+          }
+
+          const endTime = performance.now();
+          const executionTime = (endTime - startTime).toFixed(3);
+
+          outputEl.textContent = `Status: SUCCESS\nItems processed: ${items.length}\nCapacity: ${maxWeight}\nExecution time: ${executionTime} ms\nAlgorithm: 1D Dynamic Programming (Space Optimized)`;
+
+          resultValueEl.textContent = dp[maxWeight];
+          resultEl.style.display = "block";
+        } catch (error) {
+          outputEl.textContent = `Status: ERROR\nMessage: ${error.message}`;
+          resultEl.style.display = "none";
+        }
+      });
+    </script>
+  </body>
+</html>
